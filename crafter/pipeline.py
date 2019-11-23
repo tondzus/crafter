@@ -1,7 +1,7 @@
 import types
 
 
-class Step:
+class Stage:
     def __init__(self, callable):
         self.callable = callable
 
@@ -13,29 +13,23 @@ class Step:
             yield from result
 
 
-class PipelineExecution:
-    def __init__(self, steps):
-        self.steps = steps
+class Pipeline:
+    def __init__(self):
+        self.stages = []
 
-    def process_item(self, step_number, item):
-        if len(self.steps) <= step_number:
+    def register(self, callable):
+        stage = Stage(callable)
+        self.stages.append(stage)
+
+    def process(self, iterable):
+        for item in iterable:
+            yield from self.depth_first_item_process(0, item)
+
+    def depth_first_item_process(self, stage_number, item):
+        if len(self.stages) <= stage_number:
             yield item
             return
 
-        step_callable = self.steps[step_number]
+        step_callable = self.stages[stage_number]
         for processed_item in step_callable(item):
-            yield from self.process_item(step_number + 1, processed_item)
-
-
-class Pipeline:
-    def __init__(self):
-        self.steps = []
-
-    def register(self, callable):
-        step = Step(callable)
-        self.steps.append(step)
-
-    def process(self, iterable):
-        execution = PipelineExecution(self.steps)
-        for item in iterable:
-            yield from execution.process_item(0, item)
+            yield from self.depth_first_item_process(stage_number + 1, processed_item)
