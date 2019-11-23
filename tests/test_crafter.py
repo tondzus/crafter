@@ -44,3 +44,14 @@ class TestReadme:
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [2, 3, 4]
 
+    def test_register_generator(self):
+        mypipe = crafter.create_pipe('mypipe')
+        mypipe.register(double_even_item)
+
+    def test_register_and_run_generator(self):
+        mypipe = crafter.create_pipe('mypipe')
+        mypipe.register(double_even_item)
+        result = mypipe.process([1, 2, 3])
+        assert isinstance(result, types.GeneratorType)
+        assert list(result) == [1, 2, 2, 3]
+
