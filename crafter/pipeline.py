@@ -39,6 +39,8 @@ class Pipeline:
 
     def process(self, iterable):
         for item in iterable:
+            if item is None:
+                continue
             yield from self._depth_first_item_process(0, item)
 
     def _depth_first_item_process(self, stage_number, item):
@@ -48,4 +50,7 @@ class Pipeline:
 
         step_callable = self.stages[stage_number]
         for processed_item in step_callable(item):
+            if processed_item is None:
+                continue
+
             yield from self._depth_first_item_process(stage_number + 1, processed_item)

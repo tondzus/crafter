@@ -92,3 +92,10 @@ class TestMultiStageUsage:
         result = mypipe.process([1, 2, 3, 4, 5, 6])
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [2, 3, 3, 4, 5, 6, 7, 7]
+
+
+def test_drop_none_items(mypipe: Pipeline):
+    drop_even = lambda num: num if num % 2 == 1 else None
+    mypipe.register(drop_even)
+    result = mypipe.process([1, 2, 3, 4, 5])
+    assert list(result) == [1, 3, 5]
