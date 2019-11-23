@@ -1,4 +1,5 @@
 import types
+import pytest
 from crafter import crafter
 from crafter.pipeline import Pipeline
 
@@ -23,33 +24,32 @@ class DropEveryFifthItem:
             yield item
 
 
+@pytest.fixture()
+def mypipe():
+    return crafter.create_pipe('mypipe')
+
+
 class TestReadme:
-    def test_pipeline_creation(self):
-        pipe = crafter.create_pipe('mypipe')
-        assert isinstance(pipe, Pipeline)
+    def test_pipeline_creation(self, mypipe):
+        assert isinstance(mypipe, Pipeline)
 
-    def test_pipeline_as_attribute(self):
-        pipe = crafter.create_pipe('mypipe')
+    def test_pipeline_as_attribute(self, mypipe):
         assert isinstance(crafter.mypipe, Pipeline)
-        assert crafter.mypipe == pipe
+        assert crafter.mypipe == mypipe
 
-    def test_register_method(self):
-        mypipe = crafter.create_pipe('mypipe')
+    def test_register_method(self, mypipe):
         mypipe.register(add_one)
 
-    def test_register_and_run_method(self):
-        mypipe = crafter.create_pipe('mypipe')
+    def test_register_and_run_method(self, mypipe):
         mypipe.register(add_one)
         result = mypipe.process([1, 2, 3])
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [2, 3, 4]
 
-    def test_register_generator(self):
-        mypipe = crafter.create_pipe('mypipe')
+    def test_register_generator(self, mypipe):
         mypipe.register(double_even_item)
 
-    def test_register_and_run_generator(self):
-        mypipe = crafter.create_pipe('mypipe')
+    def test_register_and_run_generator(self, mypipe):
         mypipe.register(double_even_item)
         result = mypipe.process([1, 2, 3])
         assert isinstance(result, types.GeneratorType)
