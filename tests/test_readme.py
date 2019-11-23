@@ -12,7 +12,7 @@ def double_even_item(item):
     yield item
 
 
-@mypipe.register
+@mypipe.register(group=1)
 def add_one(item):
     return item + 1
 

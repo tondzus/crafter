@@ -73,6 +73,11 @@ class TestSingleStageUsage:
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [1, 2, 3, 4, 6]
 
+    def test_register_method_with_group_option(self, mypipe):
+        mypipe.register(add_one, group=1)
+        result = mypipe.process([1, 2, 3, 4])
+        assert list(result) == [2, 3, 4, 5]
+
 
 class TestMultiStageUsage:
     def test_define_multistage_pipeline(self, mypipe: Pipeline):
@@ -87,4 +92,3 @@ class TestMultiStageUsage:
         result = mypipe.process([1, 2, 3, 4, 5, 6])
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [2, 3, 3, 4, 5, 6, 7, 7]
-

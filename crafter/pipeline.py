@@ -2,10 +2,13 @@ import types
 
 
 class Stage:
-    def __init__(self, callable):
+    def __init__(self, callable, group=None):
+        if group is not None and not isinstance(group, int):
+            raise ValueError("Invalid argument group=%s - group must be int!" % group)
         if isinstance(callable, type):
             callable = callable()
         self.callable = callable
+        self.group = group
 
     def __call__(self, item):
         result = self.callable(item)
@@ -19,9 +22,20 @@ class Pipeline:
     def __init__(self):
         self.stages = []
 
-    def register(self, callable):
-        stage = Stage(callable)
-        self.stages.append(stage)
+    def register(self, callable=None, *args, group=None):
+        if callable is not None:
+            # direct invocation
+            stage = Stage(callable, group)
+            self.stages.append(stage)
+            return stage
+
+        # decorator invocation
+        def post_register(decorated_callable):
+            stage = Stage(decorated_callable, group)
+            self.stages.append(stage)
+            return stage
+
+        return post_register
 
     def process(self, iterable):
         for item in iterable:
