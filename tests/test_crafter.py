@@ -29,7 +29,7 @@ def mypipe():
     return crafter.create_pipe('mypipe')
 
 
-class TestReadme:
+class TestSingleStageUsage:
     def test_pipeline_creation(self, mypipe):
         assert isinstance(mypipe, Pipeline)
 
@@ -54,4 +54,28 @@ class TestReadme:
         result = mypipe.process([1, 2, 3])
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [1, 2, 2, 3]
+
+    def test_register_callable_class(self, mypipe):
+        mypipe.register(DropEveryFifthItem())
+
+    def test_register_and_run_callable_class(self, mypipe):
+        mypipe.register(DropEveryFifthItem())
+        result = mypipe.process([1, 2, 3, 4, 5, 6])
+        assert isinstance(result, types.GeneratorType)
+        assert list(result) == [1, 2, 3, 4, 6]
+
+
+class TestMultiStageUsage:
+    def test_define_multistage_pipeline(self, mypipe: Pipeline):
+        mypipe.register(double_even_item)
+        mypipe.register(add_one)
+        mypipe.register(DropEveryFifthItem())
+
+    def test_readme_quick_tutorial_pipeline(self, mypipe: Pipeline):
+        mypipe.register(double_even_item)
+        mypipe.register(add_one)
+        mypipe.register(DropEveryFifthItem())
+        result = mypipe.process([1, 2, 3, 4, 5, 6])
+        assert isinstance(result, types.GeneratorType)
+        assert list(result) == [2, 3, 3, 4, 5, 6, 7, 7]
 
