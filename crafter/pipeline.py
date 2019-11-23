@@ -3,6 +3,8 @@ import types
 
 class Stage:
     def __init__(self, callable):
+        if isinstance(callable, type):
+            callable = callable()
         self.callable = callable
 
     def __call__(self, item):

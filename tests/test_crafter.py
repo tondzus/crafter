@@ -55,11 +55,20 @@ class TestSingleStageUsage:
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [1, 2, 2, 3]
 
-    def test_register_callable_class(self, mypipe):
+    def test_register_callable_class_instance(self, mypipe):
         mypipe.register(DropEveryFifthItem())
 
-    def test_register_and_run_callable_class(self, mypipe):
+    def test_register_and_run_callable_class_instance(self, mypipe):
         mypipe.register(DropEveryFifthItem())
+        result = mypipe.process([1, 2, 3, 4, 5, 6])
+        assert isinstance(result, types.GeneratorType)
+        assert list(result) == [1, 2, 3, 4, 6]
+
+    def test_register_callable_class(self, mypipe):
+        mypipe.register(DropEveryFifthItem)
+
+    def test_register_and_run_callable_class(self, mypipe):
+        mypipe.register(DropEveryFifthItem)
         result = mypipe.process([1, 2, 3, 4, 5, 6])
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [1, 2, 3, 4, 6]
