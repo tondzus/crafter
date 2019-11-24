@@ -32,13 +32,16 @@ def mypipe():
 class TestSingleStageUsage:
     def test_pipeline_creation(self, mypipe):
         assert isinstance(mypipe, Pipeline)
+        assert mypipe.name == 'mypipe'
 
     def test_pipeline_as_attribute(self, mypipe):
         assert isinstance(crafter.mypipe, Pipeline)
         assert crafter.mypipe == mypipe
+        assert crafter.mypipe.name == 'mypipe'
 
     def test_register_method(self, mypipe):
-        mypipe.register(add_one)
+        stage = mypipe.register(add_one)
+        assert stage.name == 'add_one'
 
     def test_register_and_run_method(self, mypipe):
         mypipe.register(add_one)
@@ -47,7 +50,8 @@ class TestSingleStageUsage:
         assert list(result) == [2, 3, 4]
 
     def test_register_generator(self, mypipe):
-        mypipe.register(double_even_item)
+        stage = mypipe.register(double_even_item)
+        assert stage.name == 'double_even_item'
 
     def test_register_and_run_generator(self, mypipe):
         mypipe.register(double_even_item)
@@ -56,7 +60,8 @@ class TestSingleStageUsage:
         assert list(result) == [1, 2, 2, 3]
 
     def test_register_callable_class_instance(self, mypipe):
-        mypipe.register(DropEveryFifthItem())
+        stage = mypipe.register(DropEveryFifthItem())
+        assert stage.name == 'DropEveryFifthItem'
 
     def test_register_and_run_callable_class_instance(self, mypipe):
         mypipe.register(DropEveryFifthItem())
@@ -65,7 +70,8 @@ class TestSingleStageUsage:
         assert list(result) == [1, 2, 3, 4, 6]
 
     def test_register_callable_class(self, mypipe):
-        mypipe.register(DropEveryFifthItem)
+        stage = mypipe.register(DropEveryFifthItem)
+        assert stage.name == 'DropEveryFifthItem'
 
     def test_register_and_run_callable_class(self, mypipe):
         mypipe.register(DropEveryFifthItem)

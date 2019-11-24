@@ -1,4 +1,8 @@
+import logging
 from crafter.pipeline import Pipeline
+
+
+LOG = logging.getLogger('crafter.crafter')
 
 
 class Crafter:
@@ -6,7 +10,8 @@ class Crafter:
         self.pipes = {}
 
     def create_pipe(self, name):
-        self.pipes[name] = Pipeline()
+        self.pipes[name] = Pipeline(name)
+        LOG.info("Creating new pipe '%s'", name)
         return self.pipes[name]
 
     def __getattr__(self, item):
