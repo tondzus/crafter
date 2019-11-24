@@ -12,7 +12,7 @@ def double_even_item(item):
     yield item
 
 
-@mypipe.register(group=1)
+@mypipe.register(group_size=1)
 def add_one(item):
     return item + 1
 
@@ -28,7 +28,13 @@ class DropEveryFifthItem:
             yield item
 
 
+@mypipe.register(group_size=6)
+def sum_by_6(num_grp):
+    return sum(num_grp)
+
+
 def test_readme_e2e():
     result = mypipe.process([1, 2, 3, 4, 5, 6])
     assert isinstance(result, types.GeneratorType)
-    assert list(result) == [2, 3, 3, 4, 5, 6, 7, 7]
+    # before the sum_by_6 stage [2, 3, 3, 4, 5, 6, 7, 7]
+    assert list(result) == [23, 14]

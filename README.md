@@ -36,6 +36,11 @@ class DropEveryFifthItem:
             yield item
 
 
+@mypipe.register(group_size=6)
+def sum_by_6(num_grp):
+    return sum(num_grp)
+
+
 result = mypipe.process([1, 2, 3, 4, 5, 6])
-assert list(result) == [2, 3, 3, 4, 5, 6, 7, 7]
+assert list(result) == [23, 14]
 ```

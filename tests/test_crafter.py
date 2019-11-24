@@ -73,11 +73,6 @@ class TestSingleStageUsage:
         assert isinstance(result, types.GeneratorType)
         assert list(result) == [1, 2, 3, 4, 6]
 
-    def test_register_method_with_group_option(self, mypipe):
-        mypipe.register(add_one, group=1)
-        result = mypipe.process([1, 2, 3, 4])
-        assert list(result) == [2, 3, 4, 5]
-
 
 class TestMultiStageUsage:
     def test_define_multistage_pipeline(self, mypipe: Pipeline):
@@ -99,3 +94,20 @@ def test_drop_none_items(mypipe: Pipeline):
     mypipe.register(drop_even)
     result = mypipe.process([1, 2, 3, 4, 5])
     assert list(result) == [1, 3, 5]
+
+
+class TestGroups:
+    def test_register_method_with_group_option(self, mypipe: Pipeline):
+        mypipe.register(sum, group_size=2)
+        result = mypipe.process([1, 2, 3, 4])
+        assert list(result) == [3, 7]
+
+    def test_group_size_bigger_than_input_list(self, mypipe: Pipeline):
+        mypipe.register(sum, group_size=6)
+        result = mypipe.process([1, 2, 3, 4, 5])
+        assert list(result) == [15]
+
+    def test_group_size_is_not_divisible_with_input_size(self, mypipe: Pipeline):
+        mypipe.register(sum, group_size=6)
+        result = mypipe.process([1, 2, 3, 4, 5, 6, 7])
+        assert list(result) == [21, 7]
