@@ -6,6 +6,10 @@ class PipelineStop:
     pass
 
 
+def default_exception_handler(stage, item, exc: Exception):
+    stage.log.error("Stage %s couldn't process item '%': %s", stage, item, exc)
+
+
 class Stage:
     logger_name = 'crafter.stage.%s'
 
@@ -23,21 +27,46 @@ class Stage:
             callable = callable()
 
         self.callable = callable
+        self.exception_handler = default_exception_handler
 
     def __call__(self, item):
         if isinstance(item, PipelineStop):
             yield item
             return
 
-        result = self.callable(item)
+        try:
+            result = self.callable(item)
+        except Exception as exc:
+            result = self.exception_handler(self, item, exc)
+            if result is None:
+                return
+
         if not isinstance(result, types.GeneratorType):
             self.log.debug("Stage %s (function) transformed '%s' to '%s'", self.name, item, result)
             yield result
-        else:
-            for generated_result in result:
+            return
+
+        result = iter(result)
+        while True:
+            try:
+                generated_result = next(result)
+            except StopIteration:
+                break
+            except Exception as exc:
+                generated_result = self.exception_handler(self, item, exc)
+                if generated_result is None:
+                    continue
+                else:
+                    self.log.debug("Stage %s (generator) transformed '%s' to '%s'",
+                                   self.name, item, generated_result)
+                    yield generated_result
+            else:
                 self.log.debug("Stage %s (generator) transformed '%s' to '%s'",
                                self.name, item, generated_result)
                 yield generated_result
+
+    def exception(self, handler):
+        self.exception_handler = handler
 
     def __str__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)

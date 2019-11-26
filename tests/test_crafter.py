@@ -117,3 +117,48 @@ class TestGroups:
         mypipe.register(sum, group_size=6)
         result = mypipe.process([1, 2, 3, 4, 5, 6, 7])
         assert list(result) == [21, 7]
+
+
+class TestExceptionNormal:
+    def test_can_ignore_errors(self, mypipe: Pipeline):
+        int_stage = mypipe.register(lambda val: int(val))
+        int_stage.exception(lambda *args: None)
+        result = mypipe.process(['10', 5, 'hej', tuple, '2'])
+        assert list(result) == [10, 5, 2]
+
+    def test_more_useful_handler(self, mypipe: Pipeline):
+        problem_items = []
+        def handler(stage, item, exc):
+            problem_items.append((exc, item))
+
+        int_stage = mypipe.register(lambda val: int(val))
+        int_stage.exception(handler)
+
+        list(mypipe.process(['10', 5, 'hej', tuple, '2']))
+        assert len(problem_items) == 2
+        assert isinstance(problem_items[0][0], ValueError)
+        assert problem_items[0][1] == 'hej'
+        assert isinstance(problem_items[1][0], TypeError)
+        assert problem_items[1][1] == tuple
+
+
+class TestExceptionGroup:
+    def test_can_ignore_errors(self, mypipe: Pipeline):
+        int_stage = mypipe.register(sum, group_size=2)
+        int_stage.exception(lambda *args: None)
+        result = mypipe.process([1, 2, 3, '4', 5, 6])
+        assert list(result) == [3, 11]
+
+    def test_more_useful_handler(self, mypipe: Pipeline):
+        problem_items = []
+        def handler(stage, item, exc):
+            # array elements disappear if they are not copied
+            problem_items.append((exc, item[:]))
+
+        int_stage = mypipe.register(sum, group_size=2)
+        int_stage.exception(handler)
+
+        list(mypipe.process([1, 2, 3, '4', 5, 6]))
+        assert len(problem_items) == 1
+        assert isinstance(problem_items[0][0], TypeError)
+        assert problem_items[0][1] == [3, '4']
